@@ -16,10 +16,11 @@ struct GhostArticleService: ArticleService {
     }
 
     struct Constants {
-        // TODO: Replace with your Ghost content endpoint and key
-        static let baseURL = URL(string: "https://ghost.example")!
+        // EtherWorld Ghost Content API
+        static let baseURL = URL(string: "https://etherworld.co")!
         static let postsPath = "/ghost/api/content/posts/"
-        static let apiKey = "<ghost-content-api-key>"
+        // Content API key (read-only). Do not ship admin keys in client apps.
+        static let apiKey = "5b9aefe2ea7623b8fd81c52dec"
     }
 
     private let session: URLSession
