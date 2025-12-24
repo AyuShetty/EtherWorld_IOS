@@ -1,0 +1,9 @@
+# Xcode user settings
+xcuserdata/
+
+# Derived data
+DerivedData/
+
+# Build products
+build/
+Build/
