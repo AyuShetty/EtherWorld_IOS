@@ -68,6 +68,18 @@ struct GhostArticleService: ArticleService {
     }
 }
 
+#if DEBUG
+// Test hook for decoding without hitting network.
+extension GhostArticleService {
+    static func decodeArticlesForTest(from data: Data) throws -> [Article] {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let ghost = try decoder.decode(GhostPostsResponse.self, from: data)
+        return ghost.posts.map { $0.toArticle() }
+    }
+}
+#endif
+
 // MARK: - DTOs
 private struct GhostPostsResponse: Decodable {
     let posts: [GhostPost]

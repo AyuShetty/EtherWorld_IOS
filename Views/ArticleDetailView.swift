@@ -2,6 +2,14 @@ import SwiftUI
 
 struct ArticleDetailView: View {
     @ObservedObject var viewModel: ArticleDetailViewModel
+    let offlineStore: OfflineStore
+    @State private var isSaved = false
+    @State private var isToggling = false
+
+    init(viewModel: ArticleDetailViewModel, offlineStore: OfflineStore = NoopOfflineStore()) {
+        self.viewModel = viewModel
+        self.offlineStore = offlineStore
+    }
 
     var body: some View {
         ScrollView {
@@ -28,6 +36,38 @@ struct ArticleDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Article detail for \(viewModel.article.title)")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: toggleSaved) {
+                    Label(isSaved ? "Saved" : "Save", systemImage: isSaved ? "bookmark.fill" : "bookmark")
+                }
+                .disabled(isToggling)
+                .accessibilityIdentifier("offline_save_button")
+                .accessibilityLabel(isSaved ? "Saved for offline" : "Save for offline")
+            }
+        }
+        .task {
+            await loadSavedState()
+        }
+    }
+
+    private func loadSavedState() async {
+        isSaved = await offlineStore.isSaved(articleID: viewModel.article.id)
+    }
+
+    private func toggleSaved() {
+        guard !isToggling else { return }
+        isToggling = true
+        Task {
+            defer { isToggling = false }
+            if isSaved {
+                try? await offlineStore.delete(articleID: viewModel.article.id)
+                isSaved = false
+            } else {
+                try? await offlineStore.save(article: viewModel.article)
+                isSaved = true
+            }
+        }
     }
 }
 
